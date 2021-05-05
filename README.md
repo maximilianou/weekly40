@@ -56,6 +56,7 @@ Commands:
 
 
 ### GraphQL Schema First Approach ( nestjs )
+
 [https://docs.nestjs.com/graphql/quick-start] 
 ---
 - app/api/src/scripts/generate.ts ( taken from the refenence )
