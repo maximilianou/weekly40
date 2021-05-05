@@ -3,6 +3,7 @@
 ## typescript, graphql, nestjs, kubernetes, skaffold dev
 
 
+### Starting project
 ---
 - nestjs
 ```
@@ -46,13 +47,125 @@ Commands:
       └───────────────┴─────────────┴──────────────────────────────────────────────┘
 ```
 
+### Initialize Project
 ---
 - Create nest API
 ```
 :~/projects/weekly40/app$ nest new api
 ```
 
+
+### GraphQL Schema First Approach ( nestjs )
+[https://docs.nestjs.com/graphql/quick-start] 
 ---
-- 
+- app/api/src/scripts/generate.ts ( taken from the refenence )
+```ts
+import { GraphQLDefinitionsFactory } from '@nestjs/graphql';
+const definitionsFactory = new GraphQLDefinitionsFactory();
+definitionsFactory.generate({
+  typePaths: ['./src/**/*.graphql'],
+  path: `${__dirname}/../generated/types.ts`,
+  outputAs: 'interface',
+  emitTypenameField: true,
+});
 ```
+
+#### Write down some GraphQL schema in **.graphql files
+---
+- app/api/graphql.d/articles.graphql ( changed from one sample )
+```gql
+type Query {
+  articles: [Article]
+  article(id: ID!): Article
+}
+
+type Mutation {
+  createArticle(createArticleInput: CreateArticleInput): Article
+}
+
+type Subscription {
+  articleCreated: Article
+}
+
+type Owner {
+  id: Int!
+  name: String!
+  articles: [Article!]
+}
+
+type Article {
+  id: Int
+  title: String
+  content: String
+  owner: Owner
+}
+
+input CreateArticleInput {
+  name: String
+  content: String
+}
 ```
+#### Execute command to generate types, ( make generate_types )
+---
+- Generate Schema First :: GraphQL SDL :: **.graphql -> generated/types.ts
+```
+:~/projects/weekly40/app/api$ ./node_modules/.bin/ts-node src/scripts/generate.ts 
+[9:12:21 AM] The definitions have been updated.
+```
+or in the Makefile
+```
+generate_types:
+	cd app/api && ./node_modules/.bin/ts-node src/scripts/generate.ts
+```
+
+
+#### this was generated from the last command
+---
+- app/api/src/generated/types.ts
+```ts
+
+/*
+ * ------------------------------------------------------
+ * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+ * -------------------------------------------------------
+ */
+
+/* tslint:disable */
+/* eslint-disable */
+export interface CreateArticleInput {
+    name?: string;
+    content?: string;
+}
+
+export interface IQuery {
+    __typename?: 'IQuery';
+    articles(): Article[] | Promise<Article[]>;
+    article(id: string): Article | Promise<Article>;
+}
+
+export interface IMutation {
+    __typename?: 'IMutation';
+    createArticle(createArticleInput?: CreateArticleInput): Article | Promise<Article>;
+}
+
+export interface ISubscription {
+    __typename?: 'ISubscription';
+    articleCreated(): Article | Promise<Article>;
+}
+
+export interface Owner {
+    __typename?: 'Owner';
+    id: number;
+    name: string;
+    articles?: Article[];
+}
+
+export interface Article {
+    __typename?: 'Article';
+    id?: number;
+    title?: string;
+    content?: string;
+    owner?: Owner;
+}
+```
+

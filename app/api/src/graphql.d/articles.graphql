@@ -1,0 +1,30 @@
+type Query {
+  articles: [Article]
+  article(id: ID!): Article
+}
+
+type Mutation {
+  createArticle(createArticleInput: CreateArticleInput): Article
+}
+
+type Subscription {
+  articleCreated: Article
+}
+
+type Owner {
+  id: Int!
+  name: String!
+  articles: [Article!]
+}
+
+type Article {
+  id: Int
+  title: String
+  content: String
+  owner: Owner
+}
+
+input CreateArticleInput {
+  name: String
+  content: String
+}
