@@ -12,13 +12,13 @@ type Subscription {
 }
 
 type Owner {
-  id: Int!
+  id: ID!
   name: String!
   articles: [Article!]
 }
 
 type Article {
-  id: Int
+  id: ID!
   title: String
   content: String
   owner: Owner
