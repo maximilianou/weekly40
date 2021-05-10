@@ -7,37 +7,41 @@
 
 /* tslint:disable */
 /* eslint-disable */
-export interface CreateArticleInput {
+export class CreateArticleInput {
     name?: string;
     content?: string;
 }
 
-export interface IQuery {
+export abstract class IQuery {
     __typename?: 'IQuery';
-    articles(): Article[] | Promise<Article[]>;
-    article(id: string): Article | Promise<Article>;
+
+    abstract articles(): Article[] | Promise<Article[]>;
+
+    abstract article(id: string): Article | Promise<Article>;
 }
 
-export interface IMutation {
+export abstract class IMutation {
     __typename?: 'IMutation';
-    createArticle(createArticleInput?: CreateArticleInput): Article | Promise<Article>;
+
+    abstract createArticle(createArticleInput?: CreateArticleInput): Article | Promise<Article>;
 }
 
-export interface ISubscription {
+export abstract class ISubscription {
     __typename?: 'ISubscription';
-    articleCreated(): Article | Promise<Article>;
+
+    abstract articleCreated(): Article | Promise<Article>;
 }
 
-export interface Owner {
+export class Owner {
     __typename?: 'Owner';
-    id: number;
+    id: string;
     name: string;
     articles?: Article[];
 }
 
-export interface Article {
+export class Article {
     __typename?: 'Article';
-    id?: number;
+    id: string;
     title?: string;
     content?: string;
     owner?: Owner;
