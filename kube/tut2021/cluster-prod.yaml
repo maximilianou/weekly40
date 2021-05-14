@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Config
+preferences: {}
+
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://127.0.0.1
+  name: prod-cluster
+
+users:
+- name: prod-user
+  user:
+    password: prod-pass
+    username: prod-user
+    
+contexts:
+- context:
+    cluster: prod-cluster
+    namespace: prod-namespace
+    user: prod-user
+  name: prod-context
