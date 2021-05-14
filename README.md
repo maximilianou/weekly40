@@ -595,13 +595,12 @@ spec:
     targetPort: 8080
 ```
 
-*** ( Houston, we have a problem! The external IP address was not assigned! ) ***
+***( Houston, we have a problem! The external IP address was not assigned! )***
 
 -----
-+++++
-
-=====
-
+```
+read the docs
+```
 -----
 
 ### Each context is a triple (cluster, user, namespace)
@@ -620,3 +619,176 @@ export KUBECONFIG=$KUBECONFIG:config-demo:config-demo-2
 
 kubectl config view
 
+-----
+
+```yaml
+apiVersion: v1
+kind: Config
+preferences: {}
+
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://127.0.0.1
+  name: dev-cluster
+
+users:
+- name: dev-user
+  user:
+    password: dev-pass
+    username: dev-user
+    
+contexts:
+- context:
+    cluster: dev-cluster
+    namespace: dev-namespace
+    user: dev-user
+  name: dev-context
+```
+
+```
+:~/projects/weekly40/kube/tut2021$ kubectl config --kubeconfig=cluster-multi.yaml set-cluster dev-cluster --server=https://127.0.0.1 --insecure-skip-tls-verify
+Cluster "dev-cluster" set.
+```
+
+```
+:~/projects/weekly40/kube/tut2021$ kubectl config --kubeconfig=cluster-multi.yaml view
+apiVersion: v1
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://127.0.0.1
+  name: dev-cluster
+contexts:
+- context:
+    cluster: dev-cluster
+    namespace: dev-namespace
+    user: dev-user
+  name: dev-context
+current-context: ""
+kind: Config
+preferences: {}
+users:
+- name: dev-user
+  user:
+    password: dev-pass
+    username: dev-user
+```
+
+```
+:~/projects/weekly40/kube/tut2021$ kubectl config get-clusters
+NAME
+k3d-localcluster
+k3d-one-cluster
+:~/projects/weekly40/kube/tut2021$ kubectl config get-contexts
+CURRENT   NAME               CLUSTER            AUTHINFO                 NAMESPACE
+*         k3d-localcluster   k3d-localcluster   admin@k3d-localcluster   
+          k3d-one-cluster    k3d-one-cluster    admin@k3d-one-cluster   
+```
+
+---
+---
+- k3d create cluster file k3d-cluster-create-config-dev.yaml
+```
+:~/projects/weekly40/kube/tut2021$ k3d cluster create --config k3d-cluster-create-config-dev.yaml
+```
+
+<https://k3d.io/usage/configfile/>
+
+- k3d delete cluster dev-cluster
+```
+:~/projects/weekly40/kube/tut2021$ k3d cluster delete dev-cluster
+```
+
+- kubctl get context
+```
+kubectl config use-context k3d-dev-cluster
+kubectl cluster-info
+:~/projects/weekly40/kube/tut2021$ kubectl config get-contexts
+CURRENT   NAME               CLUSTER            AUTHINFO                 NAMESPACE
+*         k3d-dev-cluster    k3d-dev-cluster    admin@k3d-dev-cluster    
+          k3d-localcluster   k3d-localcluster   admin@k3d-localcluster   
+          k3d-one-cluster    k3d-one-cluster    admin@k3d-one-cluster 
+```
+
+### Kubernetes kind
+- kind: Pod, Service, Deployment, ConfigMap, Secret
+
+..
+
+- apiVersion: v1 or apps/v1
+
+- apiVersion: v1
+  - kind: Pod
+  - kind: Service
+  - kind: Secret
+- apiVersion: apps/v1
+  - kind: Deployment
+
+```
+:~/projects/weekly40/kube/tut2021$ kubectl api-resources
+NAME                              SHORTNAMES   APIVERSION                             NAMESPACED   KIND
+bindings                                       v1                                     true         Binding
+componentstatuses                 cs           v1                                     false        ComponentStatus
+configmaps                        cm           v1                                     true         ConfigMap
+endpoints                         ep           v1                                     true         Endpoints
+events                            ev           v1                                     true         Event
+limitranges                       limits       v1                                     true         LimitRange
+namespaces                        ns           v1                                     false        Namespace
+nodes                             no           v1                                     false        Node
+persistentvolumeclaims            pvc          v1                                     true         PersistentVolumeClaim
+persistentvolumes                 pv           v1                                     false        PersistentVolume
+pods                              po           v1                                     true         Pod
+podtemplates                                   v1                                     true         PodTemplate
+replicationcontrollers            rc           v1                                     true         ReplicationController
+resourcequotas                    quota        v1                                     true         ResourceQuota
+secrets                                        v1                                     true         Secret
+serviceaccounts                   sa           v1                                     true         ServiceAccount
+services                          svc          v1                                     true         Service
+mutatingwebhookconfigurations                  admissionregistration.k8s.io/v1        false        MutatingWebhookConfiguration
+validatingwebhookconfigurations                admissionregistration.k8s.io/v1        false        ValidatingWebhookConfiguration
+customresourcedefinitions         crd,crds     apiextensions.k8s.io/v1                false        CustomResourceDefinition
+apiservices                                    apiregistration.k8s.io/v1              false        APIService
+controllerrevisions                            apps/v1                                true         ControllerRevision
+daemonsets                        ds           apps/v1                                true         DaemonSet
+deployments                       deploy       apps/v1                                true         Deployment
+replicasets                       rs           apps/v1                                true         ReplicaSet
+statefulsets                      sts          apps/v1                                true         StatefulSet
+tokenreviews                                   authentication.k8s.io/v1               false        TokenReview
+localsubjectaccessreviews                      authorization.k8s.io/v1                true         LocalSubjectAccessReview
+selfsubjectaccessreviews                       authorization.k8s.io/v1                false        SelfSubjectAccessReview
+selfsubjectrulesreviews                        authorization.k8s.io/v1                false        SelfSubjectRulesReview
+subjectaccessreviews                           authorization.k8s.io/v1                false        SubjectAccessReview
+horizontalpodautoscalers          hpa          autoscaling/v1                         true         HorizontalPodAutoscaler
+cronjobs                          cj           batch/v1beta1                          true         CronJob
+jobs                                           batch/v1                               true         Job
+certificatesigningrequests        csr          certificates.k8s.io/v1                 false        CertificateSigningRequest
+leases                                         coordination.k8s.io/v1                 true         Lease
+endpointslices                                 discovery.k8s.io/v1beta1               true         EndpointSlice
+events                            ev           events.k8s.io/v1                       true         Event
+ingresses                         ing          extensions/v1beta1                     true         Ingress
+flowschemas                                    flowcontrol.apiserver.k8s.io/v1beta1   false        FlowSchema
+prioritylevelconfigurations                    flowcontrol.apiserver.k8s.io/v1beta1   false        PriorityLevelConfiguration
+helmchartconfigs                               helm.cattle.io/v1                      true         HelmChartConfig
+helmcharts                                     helm.cattle.io/v1                      true         HelmChart
+addons                                         k3s.cattle.io/v1                       true         Addon
+nodes                                          metrics.k8s.io/v1beta1                 false        NodeMetrics
+pods                                           metrics.k8s.io/v1beta1                 true         PodMetrics
+ingressclasses                                 networking.k8s.io/v1                   false        IngressClass
+ingresses                         ing          networking.k8s.io/v1                   true         Ingress
+networkpolicies                   netpol       networking.k8s.io/v1                   true         NetworkPolicy
+runtimeclasses                                 node.k8s.io/v1                         false        RuntimeClass
+poddisruptionbudgets              pdb          policy/v1beta1                         true         PodDisruptionBudget
+podsecuritypolicies               psp          policy/v1beta1                         false        PodSecurityPolicy
+clusterrolebindings                            rbac.authorization.k8s.io/v1           false        ClusterRoleBinding
+clusterroles                                   rbac.authorization.k8s.io/v1           false        ClusterRole
+rolebindings                                   rbac.authorization.k8s.io/v1           true         RoleBinding
+roles                                          rbac.authorization.k8s.io/v1           true         Role
+priorityclasses                   pc           scheduling.k8s.io/v1                   false        PriorityClass
+csidrivers                                     storage.k8s.io/v1                      false        CSIDriver
+csinodes                                       storage.k8s.io/v1                      false        CSINode
+storageclasses                    sc           storage.k8s.io/v1                      false        StorageClass
+volumeattachments                              storage.k8s.io/v1                      false        VolumeAttachment
+```
+
+---
