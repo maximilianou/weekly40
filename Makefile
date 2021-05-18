@@ -15,3 +15,7 @@ generate_types:
 step04:
 	curl -X POST http://localhost:4000/graphql -H "Content-Type: application/json" -d '{ "query":"query { article(  id: 1 ){ id, title, content } }"}'
 
+
+step90:
+	kubectl delete all --all # delete all resources in all namespaces
+
