@@ -792,3 +792,59 @@ volumeattachments                              storage.k8s.io/v1                
 ```
 
 ---
+Environment: 
+
+* Stage: ( dev, qa, prod )
+* Delivery ( 4.1, 4.2, 4.3, 4.4, 4.5 quality assurance to acceptance test)
+* Release ( 4.5 stable )
+
+---
+- Mistake Cluster Delete k3d vs kubectl - named cluster localcluster ( and not k3d-localcluster )
+
+localcluster - cluster named:
+
+```
+:~/projects/weekly40/kube/tut2021$ k3d cluster delete --verbose k3d-localcluster
+DEBU[0000] Runtime Info:
+&{Name:docker Endpoint:/var/run/docker.sock Version:20.10.6 OSType:linux OS:Debian GNU/Linux 10 (buster) Arch:x86_64 CgroupVersion:1 CgroupDriver:cgroupfs Filesystem:extfs} 
+INFO[0000] No clusters found                            
+
+:~/projects/weekly40/kube/tut2021$ k3d cluster list
+NAME           SERVERS   AGENTS   LOADBALANCER
+localcluster   1/1       2/2      true
+one-cluster    1/1       0/0      true
+
+:~/projects/weekly40/kube/tut2021$ kubectl config get-clusters
+NAME
+k3d-localcluster
+k3d-one-cluster
+```
+
+- Successfully deleted cluster loadcluster
+```
+:~/projects/weekly40/kube/tut2021$ k3d cluster delete localcluster --verbose
+DEBU[0000] Runtime Info:
+&{Name:docker Endpoint:/var/run/docker.sock Version:20.10.6 OSType:linux OS:Debian GNU/Linux 10 (buster) Arch:x86_64 CgroupVersion:1 CgroupDriver:cgroupfs Filesystem:extfs} 
+INFO[0000] Deleting cluster 'localcluster'              
+DEBU[0000] Cluster Details: &{Name:localcluster Network:{Name:my-custom-net ID: External:true IPAM:{IPPrefix:invalid IP prefix IPsUsed:[] Managed:false}} Token:superSecretToken Nodes:[0xc00062a000 0xc00036a9a0 0xc00036af20 0xc0004e4840] InitNode:<nil> ExternalDatastore:<nil> KubeAPI:<nil> ServerLoadBalancer:<nil> ImageVolume:k3d-localcluster-images} 
+DEBU[0000] Deleting node k3d-localcluster-serverlb ...  
+INFO[0000] Deleted k3d-localcluster-serverlb            
+DEBU[0000] Deleting node k3d-localcluster-agent-1 ...   
+INFO[0008] Deleted k3d-localcluster-agent-1             
+DEBU[0008] Deleting node k3d-localcluster-agent-0 ...   
+INFO[0015] Deleted k3d-localcluster-agent-0             
+DEBU[0015] Deleting node k3d-localcluster-server-0 ...  
+INFO[0021] Deleted k3d-localcluster-server-0            
+DEBU[0021] Skip deletion of cluster network 'my-custom-net' because it's managed externally 
+INFO[0021] Deleting image volume 'k3d-localcluster-images' 
+INFO[0021] Removing cluster details from default kubeconfig... 
+DEBU[0021] Using default kubeconfig '/home/maximilianou/.kube/config' 
+DEBU[0021] Wrote kubeconfig to '/home/maximilianou/.kube/config' 
+INFO[0021] Removing standalone kubeconfig file (if there is one)... 
+INFO[0021] Successfully deleted cluster localcluster!  
+```
+
+---
+- 
+```
+```
