@@ -711,7 +711,7 @@ CURRENT   NAME               CLUSTER            AUTHINFO                 NAMESPA
           k3d-one-cluster    k3d-one-cluster    admin@k3d-one-cluster 
 ```
 
-### Kubernetes kind
+### Kubernetes kind: 
 - kind: Pod, Service, Deployment, ConfigMap, Secret
 
 ..
@@ -844,7 +844,60 @@ INFO[0021] Removing standalone kubeconfig file (if there is one)...
 INFO[0021] Successfully deleted cluster localcluster!  
 ```
 
+
+
+#### Executing commands over ssh in a list of servers Makefile .env 
 ---
-- 
+- Makefile - server, create user, ssh, ssh-login, ssh-ls
+
 ```
+include .env
+#user=..
+#servers=..
+...
+
+#ssh-manual-update:
+#	apt -y update; apt -y upgrade; 
+#	adduser dev-user; 
+# usermod -g ssh dev-user; 
+#	usermod -g staff dev-user;
+
+ssh-login:
+	$(foreach server, $(servers),  ssh-copy-id  $(user)@$(server);)
+	
+ssh-ls:
+	$(foreach server, $(servers),  ssh $(user)@$(server) "ls -a";)
+...  
+```
+
+- make ssh-login ( first time password, then access without password from this computer )
+```
+:~/projects/weekly40$ make ssh-login
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/maximilianou/.ssh/id_rsa.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+...@...'s password: 
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh '...@...'"
+and check to make sure that only the key(s) you wanted were added.
+
+:~/projects/weekly40$ make ssh-ls
+ssh [user]@[server1] "ls -a";   ssh [user]@[server2] "ls -a";
+.
+..
+.bash_history
+.bash_logout
+.bashrc
+.profile
+.ssh
+.
+..
+.bash_history
+.bash_logout
+.bashrc
+.gnupg
+.profile
+.ssh
 ```
