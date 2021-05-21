@@ -1,4 +1,4 @@
-# weekly40
+# weekly40 - 2021.05
 
 ## typescript, graphql, nestjs, kubernetes, skaffold dev
 
@@ -900,5 +900,92 @@ ssh [user]@[server1] "ls -a";   ssh [user]@[server2] "ls -a";
 .gnupg
 .profile
 .ssh
+```
+
+#### Makefile .env servers, install docker over ssh
+---
+- Makefile - install docker, run as root for apt.. *( I do not like sudo )*
+```
+...
+step10 ssh-docker-install:
+	$(foreach server, $(servers),  ssh root@$(server)	" apt -y install apt-transport-https software-properties-common ca-certificates curl gnupg lsb-release; echo  'deb [arch=amd64] https://download.docker.com/linux/debian  buster stable' | tee /etc/apt/sources.list.d/docker.list > /dev/null ;  curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - ; add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" ; apt -y update; apt -y remove docker docker-engine docker.io containerd runc; apt -y install docker-ce docker-ce-cli containerd.io; usermod -aG docker $(user) " \ ;)
+...
+```
+
+- Makefile - Verify docker install for user
+```
+include .env
+#user=..
+#servers=..
+## Makefile variables
+# servers-if-not-set-then-default?=localhost ## if servers not set, then set with value localhost
+servers-exec-cmd!=hostname  ## execute command and set stdout to variable server
+
+.PHONY: view-hostname
+view-hostname:
+	echo $(servers-exec-cmd)
+
+#ssh-manual-root-update:
+#	apt -y update; apt -y upgrade;
+#	adduser dev-user; 
+# usermod -g ssh dev-user; 
+#	usermod -g staff dev-user;
+
+step10 ssh-docker-install:
+	$(foreach server, $(servers),  ssh root@$(server)	" apt -y install apt-transport-https software-properties-common ca-certificates curl gnupg lsb-release; echo  'deb [arch=amd64] https://download.docker.com/linux/debian  buster stable' | tee /etc/apt/sources.list.d/docker.list > /dev/null ;  curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - ; add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable" ; apt -y update; apt -y remove docker docker-engine docker.io containerd runc; apt -y install docker-ce docker-ce-cli containerd.io; usermod -aG docker $(user) " \ ;)
+
+step20 ssh-login:
+	$(foreach server, $(servers),  ssh-copy-id  $(user)@$(server);)
+	
+step21 ssh-ls:
+	$(foreach server, $(servers),  ssh $(user)@$(server) "ls -a";)
+
+step22 ssh-docker-hello:
+	$(foreach server, $(servers),  ssh $(user)@$(server) "docker run hello-world";)
+```
+
+```
+:~/projects/weekly40$ make ssh-docker-hello
+ssh ...@... "docker run hello-world";
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+b8dfde127a29: Pulling fs layer
+b8dfde127a29: Verifying Checksum
+b8dfde127a29: Download complete
+b8dfde127a29: Pull complete
+Digest: sha256:5122f6204b6a3596e048758cabba3c46b1c937a46b5be6225b835d091b90e46c
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+```
+
+- Makefile - install Kubernetes - k3d (cluster create/delete) - kubectl ( k8s managment )
+```
+step23 ssh-k3d-install:
+	$(foreach server, $(servers),  ssh root@$(server) "curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash";)
+	
+step24 ssh-k3d-test:
+	$(foreach server, $(servers),  ssh $(user)@$(server) "k3d --help;";)
+
+kubectl-version!=curl -L -s https://dl.k8s.io/release/stable.txt
+step25 ssh-kubectl-install:
+	$(foreach server, $(servers),  ssh root@$(server) "curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg; curl -LO 'https://dl.k8s.io/release/$(kubectl-version)/bin/linux/amd64/kubectl'; install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl;";)
+
+step26 ssh-kubectl-test:
+	$(foreach server, $(servers),  ssh $(user)@$(server) "kubectl version";)
+```
+
+```
+:~/projects/weekly40$ make ssh-kubectl-install
+ssh ...@... "curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg; curl -LO 'https://dl.k8s.io/release/v1.21.1/bin/linux/amd64/kubectl'; install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl;";
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   154  100   154    0     0   4052      0 --:--:-- --:--:-- --:--:--  4162
+100 45.3M  100 45.3M    0     0   112M      0 --:--:-- --:--:-- --:--:--  112M
+
+:~/projects/weekly40$ make ssh-kubectl-test
+ssh ...@... "kubectl version";
+Client Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.1", GitCommit:"5e58841cce77d4bc13713ad2b91fa0d961e69192", GitTreeState:"clean", BuildDate:"2021-05-12T14:18:45Z", GoVersion:"go1.16.4", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
